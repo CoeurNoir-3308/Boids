@@ -1,0 +1,23 @@
+# Visual Studio Code
+.vscode/
+
+# Fichiers compilés Java
+*.class
+
+# Répertoires de build
+target/
+build/
+
+# Fichiers temporaires et logs
+*.log
+*.tmp
+*.temp
+
+# IntelliJ IDEA (au cas où)
+.idea/
+*.iml
+
+# Eclipse (au cas où)
+.project
+.classpath
+.settings/
