@@ -62,7 +62,7 @@ public class Affichage extends JPanel {
         double x = o.getX();
         double y = o.getY();
         double direction = o.getDirection();
-        double longueur = o.getVue();
+        double longueur = o.getVue() / 2;
 
         int x2 = (int) (x + longueur * Math.cos(direction));
         int y2 = (int) (y + longueur * Math.sin(direction));
