@@ -46,4 +46,8 @@ public class Oiseau {
         x += vitesse * Math.cos(direction);
         y += vitesse * Math.sin(direction);
     }
+
+    public void ajusterDirection(double delta) {
+        this.direction += delta;
+    }    
 }
