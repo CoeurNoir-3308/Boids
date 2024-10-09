@@ -20,7 +20,6 @@ public class Monde {
     public void mettreAJour() {
         for (Oiseau o : oiseaux) {
             verifierEvitementMurs(o);
-            verifierEvitementAutresOiseaux(o);
             o.deplacement();
         }
     }
@@ -64,20 +63,10 @@ public class Monde {
         }
     }
 
-    private void verifierEvitementAutresOiseaux(Oiseau o) {
-        for (Oiseau autre : oiseaux) {
-            if (autre != o) {
-                double distance = Math.sqrt(Math.pow(o.getX() - autre.getX(), 2) + Math.pow(o.getY() - autre.getY(), 2));
-                if (distance < o.getVue() / 2) {
-                    double angleEvitement = Math.atan2(o.getY() - autre.getY(), o.getX() - autre.getX());
-                    //expression ternaire (remplace if else)
-                    //fonctionnement : condition ? valeur_si_vrai : valeur_si_faux;
-                    o.ajusterDirection(angleEvitement > o.getDirection() ? Math.PI / 60 : -Math.PI / 60);
-                }
-            }
-        }
+    public boolean seVoient(Oiseau o1, Oiseau o2) {
+        double distance = Math.sqrt(Math.pow(o1.getX() - o2.getX(), 2) + Math.pow(o1.getY() - o2.getY(), 2));
+        return distance <= o1.getVue();
     }
-    
 
     public ArrayList<Oiseau> getOiseaux() {
         return oiseaux;
