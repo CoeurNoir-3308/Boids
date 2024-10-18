@@ -51,7 +51,6 @@ public class Monde {
             Vector2D alignement = calculerAlignement(o).mult(getFacteurAlignement());
             Vector2D cohesion = calculerCohesion(o).mult(getFacteurCohesion());
 
-            // Combine ces forces et ajuste la direction
             Vector2D forceTotale = separation.add(alignement).add(cohesion);
             o.ajusterDirection(forceTotale.getAngle());
             verifierEvitementMurs(o);
@@ -66,12 +65,13 @@ public class Monde {
                 double distance = o.distance(autre);
                 if (distance < o.getVue() / 2) {
                     Vector2D difference = new Vector2D(o.getX() - autre.getX(), o.getY() - autre.getY());
-                    forceSeparation = forceSeparation.add(difference.normaliser().div(distance));  // Évite de trop se rapprocher
+                    difference = difference.normaliser().div(distance);
+                    forceSeparation = forceSeparation.add(difference);
                 }
             }
         }
-        return forceSeparation;
-    }
+        return forceSeparation.normaliser();
+    }    
     
     private Vector2D calculerAlignement(Oiseau o) {
         Vector2D directionMoyenne = new Vector2D(0, 0);
@@ -83,11 +83,12 @@ public class Monde {
             }
         }
         if (voisins > 0) {
-            directionMoyenne = directionMoyenne.div(voisins);  // Moyenne des directions
+            directionMoyenne = directionMoyenne.div(voisins);
             return directionMoyenne.normaliser();
         }
         return new Vector2D(0, 0);
     }
+    
     
     private Vector2D calculerCohesion(Oiseau o) {
         Vector2D centreDeMasse = new Vector2D(0, 0);
@@ -99,36 +100,36 @@ public class Monde {
             }
         }
         if (voisins > 0) {
-            centreDeMasse = centreDeMasse.div(voisins);  // Centre de masse des voisins
-            return new Vector2D(centreDeMasse.getX() - o.getX(), centreDeMasse.getY() - o.getY()).normaliser();
+            centreDeMasse = centreDeMasse.div(voisins);
+            Vector2D directionVersCentre = new Vector2D(centreDeMasse.getX() - o.getX(), centreDeMasse.getY() - o.getY());
+            return directionVersCentre.normaliser();
         }
         return new Vector2D(0, 0);
     }
+    
     
 
     private void verifierEvitementMurs(Oiseau o) {
         double direction = o.getDirection();
         
-        // Rebonds avec le plafond (haut)
         if (o.getY() <= o.getVue() / 2) { // Plafond
-            o.setY(o.getVue() / 2); // Empêche de sortir de l'écran
-            o.setDirection(-direction); // Inversion de la direction verticale
-        }
-        // Rebonds avec le sol (bas)
-        else if (o.getY() >= hauteurFenetre - (o.getVue() / 2)) { // Sol
-            o.setY(hauteurFenetre - (o.getVue() / 2)); // Empêche de sortir de l'écran
-            o.setDirection(-direction); // Inversion de la direction verticale
+            o.setY(o.getVue() / 2);
+            o.setDirection(-direction);
         }
         
-        // Rebonds avec le mur droit
-        if (o.getX() >= largeurFenetre - (o.getVue() / 2)) { // Mur droit
-            o.setX(largeurFenetre - (o.getVue() / 2)); // Empêche de sortir de l'écran
-            o.setDirection(Math.PI - direction); // Inversion de la direction horizontale
+        else if (o.getY() >= hauteurFenetre - (o.getVue() / 2)) { // Sol
+            o.setY(hauteurFenetre - (o.getVue() / 2));
+            o.setDirection(-direction);
         }
-        // Rebonds avec le mur gauche
+        
+        if (o.getX() >= largeurFenetre - (o.getVue() / 2)) { // Mur droit
+            o.setX(largeurFenetre - (o.getVue() / 2));
+            o.setDirection(Math.PI - direction);
+        }
+        
         else if (o.getX() <= o.getVue() / 2) { // Mur gauche
-            o.setX(o.getVue() / 2); // Empêche de sortir de l'écran
-            o.setDirection(Math.PI - direction); // Inversion de la direction horizontale
+            o.setX(o.getVue() / 2);
+            o.setDirection(Math.PI - direction);
         }
     }
     
