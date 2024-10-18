@@ -13,6 +13,12 @@ public class Oiseau {
         this.vitesse = 1.5;
         this.vue = 60;
     }
+
+    public double distance(Oiseau autre) {
+        double dx = this.x - autre.getX();
+        double dy = this.y - autre.getY();
+        return Math.sqrt(dx * dx + dy * dy);
+    }
     
     public double getX() {
         return x;
