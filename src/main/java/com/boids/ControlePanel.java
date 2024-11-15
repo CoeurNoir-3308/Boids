@@ -21,7 +21,7 @@ public class ControlePanel extends JFrame {
         separationSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                monde.setFacteurSeparation(separationSlider.getValue() / 50.0);  // Ajuste la séparation
+                monde.setFacteurSeparation(separationSlider.getValue() / 50.0);
             }
         });
         add(separationSlider);
@@ -32,7 +32,7 @@ public class ControlePanel extends JFrame {
         alignementSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                monde.setFacteurAlignement(alignementSlider.getValue() / 50.0);  // Ajuste l'alignement
+                monde.setFacteurAlignement(alignementSlider.getValue() / 50.0);
             }
         });
         add(alignementSlider);
@@ -43,7 +43,7 @@ public class ControlePanel extends JFrame {
         cohesionSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                monde.setFacteurCohesion(cohesionSlider.getValue() / 50.0);  // Ajuste la cohésion
+                monde.setFacteurCohesion(cohesionSlider.getValue() / 50.0);
             }
         });
         add(cohesionSlider);

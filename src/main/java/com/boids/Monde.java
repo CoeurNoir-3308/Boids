@@ -6,6 +6,7 @@ public class Monde {
     private ArrayList<Oiseau> oiseaux;
     private int largeurFenetre;
     private int hauteurFenetre;
+    private int profondeurFenetre;
 
     private double facteurSeparation = 1.0;
     private double facteurAlignement = 1.0;
@@ -35,10 +36,11 @@ public class Monde {
         this.facteurCohesion = facteurCohesion;
     }
 
-    public Monde(int largeurFenetre, int hauteurFenetre) {
+    public Monde(int largeurFenetre, int hauteurFenetre, int profondeurFenetre) {
         oiseaux = new ArrayList<>();
         this.largeurFenetre = largeurFenetre;
         this.hauteurFenetre = hauteurFenetre;
+        this.profondeurFenetre = profondeurFenetre;
     }
 
     public void ajouterOiseau(Oiseau o) {
@@ -47,24 +49,27 @@ public class Monde {
 
     public void mettreAJour() {
         for (Oiseau o : oiseaux) {
-            Vector2D separation = calculerSeparation(o).mult(getFacteurSeparation());
-            Vector2D alignement = calculerAlignement(o).mult(getFacteurAlignement());
-            Vector2D cohesion = calculerCohesion(o).mult(getFacteurCohesion());
+            Vector3D separation = calculerSeparation(o).mult(getFacteurSeparation());
+            Vector3D alignement = calculerAlignement(o).mult(getFacteurAlignement());
+            Vector3D cohesion = calculerCohesion(o).mult(getFacteurCohesion());
 
-            Vector2D forceTotale = separation.add(alignement).add(cohesion);
-            o.ajusterDirection(forceTotale.getAngle());
+            Vector3D forceTotale = separation.add(alignement).add(cohesion);
+        
+            double[] angles = forceTotale.getAngles();
+            o.setDirection(angles[0], angles[1]);  // Définit la direction en utilisant azimut et élévation
+
             verifierEvitementMurs(o);
             o.deplacement();
         }
     }
 
-    private Vector2D calculerSeparation(Oiseau o) {
-        Vector2D forceSeparation = new Vector2D(0, 0);
+    private Vector3D calculerSeparation(Oiseau o) {
+        Vector3D forceSeparation = new Vector3D(0, 0, 0);
         for (Oiseau autre : oiseaux) {
             if (autre != o) {
                 double distance = o.distance(autre);
-                if (distance < o.getVue() / 2) {
-                    Vector2D difference = new Vector2D(o.getX() - autre.getX(), o.getY() - autre.getY());
+                if (distance < o.getVue() / 4) {
+                    Vector3D difference = new Vector3D(o.getX() - autre.getX(), o.getY() - autre.getY(), o.getZ() - autre.getZ());
                     difference = difference.normaliser().div(distance);
                     forceSeparation = forceSeparation.add(difference);
                 }
@@ -73,74 +78,100 @@ public class Monde {
         return forceSeparation.normaliser();
     }    
     
-    private Vector2D calculerAlignement(Oiseau o) {
-        Vector2D directionMoyenne = new Vector2D(0, 0);
+    private Vector3D calculerAlignement(Oiseau o) {
+        Vector3D directionMoyenne = new Vector3D(0, 0, 0);
         int voisins = 0;
+        
         for (Oiseau autre : oiseaux) {
             if (autre != o && o.distance(autre) < o.getVue()) {
-                directionMoyenne = directionMoyenne.add(Vector2D.fromAngle(autre.getDirection()));
+                directionMoyenne = directionMoyenne.add(autre.getDirectionVector());
                 voisins++;
             }
         }
+        
         if (voisins > 0) {
             directionMoyenne = directionMoyenne.div(voisins);
             return directionMoyenne.normaliser();
         }
-        return new Vector2D(0, 0);
+        
+        return new Vector3D(0, 0, 0);
     }
     
     
-    private Vector2D calculerCohesion(Oiseau o) {
-        Vector2D centreDeMasse = new Vector2D(0, 0);
+    
+    private Vector3D calculerCohesion(Oiseau o) {
+        Vector3D centreDeMasse = new Vector3D(0, 0, 0);
         int voisins = 0;
         for (Oiseau autre : oiseaux) {
             if (autre != o && o.distance(autre) < o.getVue()) {
-                centreDeMasse = centreDeMasse.add(new Vector2D(autre.getX(), autre.getY()));
+                centreDeMasse = centreDeMasse.add(new Vector3D(autre.getX(), autre.getY(), autre.getZ()));
                 voisins++;
             }
         }
         if (voisins > 0) {
             centreDeMasse = centreDeMasse.div(voisins);
-            Vector2D directionVersCentre = new Vector2D(centreDeMasse.getX() - o.getX(), centreDeMasse.getY() - o.getY());
+            Vector3D directionVersCentre = new Vector3D(centreDeMasse.getX() - o.getX(), centreDeMasse.getY() - o.getY(), centreDeMasse.getZ() - o.getZ());
             return directionVersCentre.normaliser();
         }
-        return new Vector2D(0, 0);
+        return new Vector3D(0, 0, 0);
     }
     
     
 
     private void verifierEvitementMurs(Oiseau o) {
-        double direction = o.getDirection();
-        
-        if (o.getY() <= o.getVue() / 2) { // Plafond
-            o.setY(o.getVue() / 2);
-            o.setDirection(-direction);
+        double vue = o.getVue() / 2; // Distance de "vue" pour anticiper les rebonds
+    
+        // Vérifie collision avec le plafond
+        if (o.getY() <= vue) { // Plafond
+            o.setY(vue); // Empêche de dépasser la limite
+            o.setDirection(o.getDirection()[0], -o.getDirection()[1]); // Inversion de la direction Y (élevation)
         }
-        
-        else if (o.getY() >= hauteurFenetre - (o.getVue() / 2)) { // Sol
-            o.setY(hauteurFenetre - (o.getVue() / 2));
-            o.setDirection(-direction);
+        // Vérifie collision avec le sol
+        else if (o.getY() >= hauteurFenetre - vue) { // Sol
+            o.setY(hauteurFenetre - vue); // Empêche de dépasser la limite
+            o.setDirection(o.getDirection()[0], -o.getDirection()[1]); // Inversion de la direction Y
         }
-        
-        if (o.getX() >= largeurFenetre - (o.getVue() / 2)) { // Mur droit
-            o.setX(largeurFenetre - (o.getVue() / 2));
-            o.setDirection(Math.PI - direction);
+    
+        // Vérifie collision avec le mur droit
+        if (o.getX() >= largeurFenetre - vue) { // Mur droit
+            o.setX(largeurFenetre - vue);
+            o.setDirection(Math.PI - o.getDirection()[0], o.getDirection()[1]); // Inversion de la direction X (azimut)
         }
-        
-        else if (o.getX() <= o.getVue() / 2) { // Mur gauche
-            o.setX(o.getVue() / 2);
-            o.setDirection(Math.PI - direction);
+        // Vérifie collision avec le mur gauche
+        else if (o.getX() <= vue) { // Mur gauche
+            o.setX(vue);
+            o.setDirection(Math.PI - o.getDirection()[0], o.getDirection()[1]); // Inversion de la direction X
+        }
+    
+        // Vérifie collision avec la face arrière
+        if (o.getZ() >= profondeurFenetre - vue) { // Face arrière
+            o.setZ(profondeurFenetre - vue);
+            o.setDirection(o.getDirection()[0], Math.PI - o.getDirection()[1]); // Inversion de la direction Z (élevation)
+        }
+        // Vérifie collision avec la face avant
+        else if (o.getZ() <= vue) { // Face avant
+            o.setZ(vue);
+            o.setDirection(o.getDirection()[0], Math.PI - o.getDirection()[1]); // Inversion de la direction Z
         }
     }
-    
-    
-
     public boolean seVoient(Oiseau o1, Oiseau o2) {
-        double distance = Math.sqrt(Math.pow(o1.getX() - o2.getX(), 2) + Math.pow(o1.getY() - o2.getY(), 2));
+        double distance = o1.distance(o2);
         return distance <= o1.getVue();
     }
 
     public ArrayList<Oiseau> getOiseaux() {
         return oiseaux;
+    }
+
+    public int getLargeurFenetre(){
+        return largeurFenetre;
+    }
+
+    public int getHauteurFenetre(){
+        return hauteurFenetre;
+    }
+
+    public int getProfondeurFenetre(){
+        return profondeurFenetre;
     }
 }
