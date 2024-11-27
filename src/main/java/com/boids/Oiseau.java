@@ -1,5 +1,6 @@
 package com.boids;
 import java.awt.*;
+import java.util.Random;
 
 public class Oiseau {
     private double x, y, z;
@@ -7,6 +8,19 @@ public class Oiseau {
     private double vitesse;
     private double vue;
     private Color couleur; 
+
+    public Oiseau(){
+        Random rand = new Random();
+        this.x = rand.nextInt(500);
+        this.y = rand.nextInt(500);
+        this.z = rand.nextInt(500);
+        this.directionX = rand.nextInt(10)+1;
+        this.directionY = rand.nextInt(10)+1;
+        this.directionZ = rand.nextInt(10)+1;
+        this.couleur = Color.BLACK;
+        this.vitesse = 1;
+        this.vue = 50;
+    }
     
     public Oiseau(double x, double y, double z, double directionX, double directionY, double directionZ) {
         this.x = x;

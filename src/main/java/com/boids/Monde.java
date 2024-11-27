@@ -56,7 +56,7 @@ public class Monde {
             Vector3D forceTotale = separation.add(alignement).add(cohesion);
         
             double[] angles = forceTotale.getAngles();
-            o.setDirection(angles[0], angles[1]);  // Définit la direction en utilisant azimut et élévation
+            o.setDirection(angles[0], angles[1]);
 
             verifierEvitementMurs(o);
             o.deplacement();
@@ -119,39 +119,37 @@ public class Monde {
     
 
     private void verifierEvitementMurs(Oiseau o) {
-        double vue = o.getVue() / 2; // Distance de "vue" pour anticiper les rebonds
+        double vue = o.getVue() / 2;
     
-        // Vérifie collision avec le plafond
         if (o.getY() <= vue) { // Plafond
-            o.setY(vue); // Empêche de dépasser la limite
-            o.setDirection(o.getDirection()[0], -o.getDirection()[1]); // Inversion de la direction Y (élevation)
+            o.setY(vue);
+            o.setDirection(o.getDirection()[0], -o.getDirection()[1]);
         }
-        // Vérifie collision avec le sol
+        
         else if (o.getY() >= hauteurFenetre - vue) { // Sol
-            o.setY(hauteurFenetre - vue); // Empêche de dépasser la limite
-            o.setDirection(o.getDirection()[0], -o.getDirection()[1]); // Inversion de la direction Y
+            o.setY(hauteurFenetre - vue);
+            o.setDirection(o.getDirection()[0], -o.getDirection()[1]);
         }
     
         // Vérifie collision avec le mur droit
         if (o.getX() >= largeurFenetre - vue) { // Mur droit
             o.setX(largeurFenetre - vue);
-            o.setDirection(Math.PI - o.getDirection()[0], o.getDirection()[1]); // Inversion de la direction X (azimut)
+            o.setDirection(Math.PI - o.getDirection()[0], o.getDirection()[1]);
         }
-        // Vérifie collision avec le mur gauche
+        
         else if (o.getX() <= vue) { // Mur gauche
             o.setX(vue);
-            o.setDirection(Math.PI - o.getDirection()[0], o.getDirection()[1]); // Inversion de la direction X
+            o.setDirection(Math.PI - o.getDirection()[0], o.getDirection()[1]);
         }
     
-        // Vérifie collision avec la face arrière
         if (o.getZ() >= profondeurFenetre - vue) { // Face arrière
             o.setZ(profondeurFenetre - vue);
-            o.setDirection(o.getDirection()[0], Math.PI - o.getDirection()[1]); // Inversion de la direction Z (élevation)
+            o.setDirection(o.getDirection()[0], Math.PI - o.getDirection()[1]);
         }
-        // Vérifie collision avec la face avant
+        
         else if (o.getZ() <= vue) { // Face avant
             o.setZ(vue);
-            o.setDirection(o.getDirection()[0], Math.PI - o.getDirection()[1]); // Inversion de la direction Z
+            o.setDirection(o.getDirection()[0], Math.PI - o.getDirection()[1]);
         }
     }
     public boolean seVoient(Oiseau o1, Oiseau o2) {
